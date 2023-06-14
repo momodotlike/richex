@@ -13,8 +13,8 @@ class ForgetPwdController extends BaseController {
   RxBool showPwd = false.obs;
 
   late TimerUtil mCountDownTimerUtil;
-  final String NOR_COUNT_TIME = '获取验证码';
-  RxString countTime = '获取验证码'.obs;
+  final String NOR_COUNT_TIME = '获取验证码'.tr;
+  RxString countTime = '获取验证码'.tr.obs;
   RxBool btnEnable = true.obs;
   RxBool checkBtnEnable = false.obs;
 
@@ -34,7 +34,7 @@ class ForgetPwdController extends BaseController {
       int _tick = tick ~/ 1000;
       countTime.value = '${_tick}s';
       if (_tick.toInt() == 0) {
-        countTime.value = '获取验证码';
+        countTime.value = '获取验证码'.tr;
         mCountDownTimerUtil.setTotalTime(60 * 1000);
       }
     });
@@ -61,7 +61,7 @@ class ForgetPwdController extends BaseController {
     var mobile = phoneCodeStr.trim();
     if(countTime.value != NOR_COUNT_TIME) return;
     if(mobile.isEmpty) {
-      Util.showToast('手机号不能为空');
+      Util.showToast('手机号不能为空'.tr);
       return;
     }
     mCountDownTimerUtil.startCountDown();
@@ -95,12 +95,12 @@ class ForgetPwdPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: MyAppBar('找回密码'),
+      appBar: MyAppBar('找回密码'.tr),
       backgroundColor: C.white,
       body: Obx(() {
-        String curStr = '下一步';
+        String curStr = '下一步'.tr;
         if(controller.showInputContent.isTrue) {
-          curStr = '确认';
+          curStr = '确认'.tr;
         }
         return Stack(
           children: [
@@ -137,7 +137,7 @@ class ForgetPwdPage extends StatelessWidget {
               children: [
                 MyImg.icQues,
                 10.w.spaceW,
-                MyText('找回密码后,1小时无法提币 ',color: C.ffa8c35,size: 15.sp,),
+                MyText('找回密码后,1小时无法提币 '.tr,color: C.ffa8c35,size: 15.sp,),
               ],
             ),
           ),
@@ -146,7 +146,7 @@ class ForgetPwdPage extends StatelessWidget {
             height: 44.h,
             child: MyTextField(
               hintStyle: TextStyle(color: C.f999,fontSize: 14.sp),
-              hintText: '请输入您的邮箱或手机号码',
+              hintText: '请输入您的邮箱或手机号码'.tr,
               contentPadding: MyInsets(vertical: 12.h,left: 15.w),
               onChanged: (v) {
                 controller.phoneCodeStr = v.trim();
@@ -159,11 +159,11 @@ class ForgetPwdPage extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               24.h.spaceH,
-              _phoneLoginItem('输入新密码',controller.newPwdCtrl.value,showPwd: true),
+              _phoneLoginItem('输入新密码'.tr,controller.newPwdCtrl.value,showPwd: true),
               24.h.spaceH,
-              _phoneLoginItem('确认新密码',controller.confirmPwdCtrl.value,showPwd: true),
+              _phoneLoginItem('确认新密码'.tr,controller.confirmPwdCtrl.value,showPwd: true),
               24.h.spaceH,
-              _phoneLoginItem('请输入验证码',controller.codeCtrl.value,showVerify: true),
+              _phoneLoginItem('请输入验证码'.tr,controller.codeCtrl.value,showVerify: true),
             ],
           ),
 
@@ -248,7 +248,7 @@ class ForgetPwdPage extends StatelessWidget {
                   onTap: () {
                     if(controller.countTime.value != controller.NOR_COUNT_TIME) return;
                     if(controller.phoneCodeStr.isEmpty) {
-                      Util.showToast('手机号不能为空');
+                      Util.showToast('手机号不能为空'.tr);
                       return;
                     }
                     controller.startTimer();

@@ -5,6 +5,8 @@
  * @Date: 2018/9/8
  */
 
+import 'package:get/get.dart';
+
 /// 一些常用格式参照。可以自定义格式，例如：'yyyy/MM/dd HH:mm:ss'，'yyyy/M/d HH:mm:ss'。
 /// 格式要求
 /// year -> yyyy/yy   month -> MM/M    day -> dd/d
@@ -377,3 +379,36 @@ class DateUtil {
     }
   }
 }
+
+class DateCountDownUtil{
+
+  //根据总秒数转换为对应的 hh:mm:ss 格式
+  static String constructTime(int seconds) {
+    int day = seconds ~/3600 ~/24;
+    int hour = seconds ~/ 3600 %24;
+    int minute = seconds % 3600 ~/ 60;
+    int second = seconds % 60;
+    if(day != 0){
+      return formatTime(day)+'天'.tr +formatTime(hour) + "小时".tr + formatTime(minute) + "分".tr + formatTime(second)+'秒'.tr;
+    }else if(hour != 0){
+      return formatTime(hour) + "小时".tr + formatTime(minute) + "分".tr + formatTime(second)+'秒'.tr;
+    }else if(minute !=0){
+      return formatTime(minute) + "分".tr + formatTime(second)+'秒'.tr;
+    }else if(second!=0){
+      return formatTime(second)+'秒'.tr;
+    }else {
+      return '';
+    }
+  }
+
+  //数字格式化，将 0~9 的时间转换为 00~09
+  static String formatTime(int timeNum) {
+    return timeNum < 10 ? "0" + timeNum.toString() : timeNum.toString();
+  }
+
+  //日期时间差 秒数
+  static difference(startTime,endTime){
+    return DateTime.parse(startTime).difference(endTime).inSeconds;
+  }
+}
+

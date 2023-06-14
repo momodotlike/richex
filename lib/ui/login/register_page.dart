@@ -1,9 +1,4 @@
-import 'dart:io';
-
-import 'package:flutter/gestures.dart';
-import 'package:flutter_rich_ex/bean/area_code_info.dart';
-import 'package:flutter_rich_ex/router/routes.dart';
-import 'package:flutter_rich_ex/service/user_service.dart';
+import 'package:flutter_rich_ex/service/login_service.dart';
 import 'package:flutter_rich_ex/util/export.dart';
 import 'package:flutter_rich_ex/util/timer_util.dart';
 import 'package:get/get.dart';
@@ -11,22 +6,19 @@ import 'package:get/get.dart';
 class RegisterController extends BaseController {
 
   Rx<TextEditingController> accCtrl = TextEditingController().obs;
+  Rx<TextEditingController> codeCtrl = TextEditingController().obs;
   Rx<TextEditingController> pwdCtrl = TextEditingController().obs;
+  Rx<TextEditingController> pwdConfirmCtrl = TextEditingController().obs;
+  Rx<TextEditingController> inviteCodeCtrl = TextEditingController().obs;
   RxBool showPwd = false.obs;
   RxBool checkBox = false.obs;
 
   late TimerUtil mCountDownTimerUtil;
-  final String NOR_COUNT_TIME = '获取验证码';
-  RxString countTime = '获取验证码'.obs;
+  final String NOR_COUNT_TIME = '获取验证码'.tr;
+  RxString countTime = '获取验证码'.tr.obs;
   RxBool btnEnable = false.obs;
   RxBool loginBtnEnable = false.obs;
   RxString currAreaCode = 'USA'.obs;
-
-  RxString curLoginType = '邮箱'.obs;
-  final String TYPE_EMAIL = '邮箱';
-  final String TYPE_PHONE = '手机号';
-
-  RxString curCodeStr = '+86'.obs;
 
   @override
   void onReady() {
@@ -41,7 +33,7 @@ class RegisterController extends BaseController {
       int _tick = tick ~/ 1000;
       countTime.value = '${_tick}s';
       if (_tick.toInt() == 0) {
-        countTime.value = '获取验证码';
+        countTime.value = '获取验证码'.tr;
         mCountDownTimerUtil.setTotalTime(60 * 1000);
       }
     });
@@ -69,38 +61,55 @@ class RegisterController extends BaseController {
     var mobile = accCtrl.value.text.trim();
     if(countTime.value != NOR_COUNT_TIME) return;
     if(mobile.isEmpty) {
-      Util.showToast('手机号不能为空');
+      Util.showToast('手机号不能为空'.tr);
       return;
     }
+    // mobile = 'feyoyi1055@ratedane.com';
     print('当前内容===${accCtrl.value.text}');
     mCountDownTimerUtil.startCountDown();
-    var data = {
-      'mobile': mobile,
-      'code': Constant.SMS_LOGIN
-    };
-  }
-
-  toLogin() async{
-    var data = {
-      'mobile': '15502013146',
-      'password': '123456',
-    };
-    bool result = await UserService.loginPre(data);
-    if(result) {
-      SpUtil.putBool(Constant.IS_LOGIN,true);
-      RouteUtil.toMain();
-    }
-  }
-
-  void toRegister() {
-    Get.toNamed(AppRoutes.FORGET_PWD);
+    var res = await LoginService.getVerifyCode(mobile, 'reg');
+    Util.showToast(res['msg']);
   }
 
   void toAreaCodeList() async{
     var res = await Get.toNamed(AppRoutes.AREA_CODE);
-    print('当前结果$res');
-    if(res !=null) {
-      curCodeStr.value = res;
+  }
+
+  void toRegisterAction() async{
+    var mobile = accCtrl.value.text.trim();
+    var pwd = pwdCtrl.value.text.trim();
+    var pwdConfirm = pwdConfirmCtrl.value.text.trim();
+    var inviteCode = inviteCodeCtrl.value.text.trim();
+    var smsCode = codeCtrl.value.text.trim();
+
+    if(mobile.isEmpty) {
+      Util.showToast('账号不能为空'.tr);
+      return ;
+    }
+    if(pwd.isEmpty || pwdConfirm.isEmpty) {
+      Util.showToast('密码不能为空'.tr);
+      return ;
+    }
+    if(pwd != pwdConfirm ) {
+      Util.showToast('两次密码不一致'.tr);
+      return ;
+    }
+    if(smsCode.isEmpty) {
+      Util.showToast('验证码不能为空'.tr);
+      return ;
+    }
+
+    // mobile = 'feyoyi1055@ratedane.com';
+    var data = {
+      'm_name': mobile,
+      'm_pwd': pwd,
+      'sms_code': smsCode,
+      'invite_code': inviteCode
+    };
+    var res = await LoginService.register(data);
+    Util.showToast(res['msg']);
+    if(res['state'] == Constant.code1) {
+      Get.back();
     }
   }
 }
@@ -126,68 +135,38 @@ class RegisterPage extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                // MyText('登录',color: C.f131a22,size: 18.sp,),
                 MyGestureDetector(
                   onTap: () => Get.back(),
-                  child: MyText('去登录',color: C.f999,size: 16.sp,),
+                  child: MyText('去登录'.tr,color: C.f999,size: 16.sp,),
                 ),
               ],
             ),
           ),
-          100.h.spaceH,
+          80.h.spaceH,
           MyImg.assetImg('login/ic_login_logo.png', 194.w, 88.h),
-          96.h.spaceH,
+          60.h.spaceH,
           Container(
             margin: MyInsets(bottom: 12.h),
-            child: Obx(() {
-              return Row( // curLoginType
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  MyGestureDetector(
-                      onTap: () {
-                        controller.curLoginType.value = controller.TYPE_EMAIL;
-                      },
-                      child: MyText('邮箱',color: controller.curLoginType.value == controller.TYPE_EMAIL ? C.f131a22 : C.f999,size: 18.sp,)
-                  ),
-                  MyGestureDetector(
-                      onTap: () {
-                        controller.curLoginType.value = controller.TYPE_PHONE;
-                      },
-                      child: MyText('手机号',color: controller.curLoginType.value == controller.TYPE_PHONE ? C.f131a22 : C.f999,size: 16.sp,)
-                  ),
-                ],
-              );
-            }),
+            child: MyText('欢迎注册FUJL'.tr,bold: true,size: 22.sp,),
           ),
 
-          Obx(() {
-            if(controller.curLoginType.value == controller.TYPE_EMAIL) {
-              return MyCard(
-                  child: Column(
-                    children: [
-                      _areaItem(),
-                      16.h.spaceH,
-                      _phoneLoginItem('请输入您的邮地址',controller.accCtrl.value,),
-                      16.h.spaceH,
-                      _phoneLoginItem('请输入验证码',controller.pwdCtrl.value,showVerify: true),
-                      16.h.spaceH,
-                      _phoneLoginItem('邀请码（必填）',controller.pwdCtrl.value),
-                    ],
-                  )
-              );
-            }
-            return MyCard(
-                child: Column(
-                  children: [
-                    _phoneLoginItem('请输入您的邮箱或手机号码',controller.accCtrl.value,showPre: true),
-                    16.h.spaceH,
-                    _phoneLoginItem('请输入密码',controller.pwdCtrl.value,showPwd: true),
-                    16.h.spaceH,
-                    _phoneLoginItem('邀请码（必填）',controller.pwdCtrl.value),
-                  ],
-                )
-            );
-          }),
+          MyCard(
+              child: Column(
+                children: [
+                  // _areaItem(),
+                  // 10.h.spaceH,
+                  _phoneLoginItem('请输入手机号或者电子邮箱'.tr,controller.accCtrl.value,),
+                  10.h.spaceH,
+                  _phoneLoginItem('请输入验证码'.tr,controller.codeCtrl.value,showVerify: true),
+                  10.h.spaceH,
+                  _phoneLoginItem('请设置登录密码'.tr,controller.pwdCtrl.value,showPwd: true),
+                  10.h.spaceH,
+                  _phoneLoginItem('请再次输入登录密码'.tr,controller.pwdConfirmCtrl.value,showPwd: true),
+                  10.h.spaceH,
+                  _phoneLoginItem('请输入邀请码'.tr,controller.inviteCodeCtrl.value,),
+                ],
+              )
+          ),
 
           Obx(() {
             return Row(
@@ -196,13 +175,13 @@ class RegisterPage extends StatelessWidget {
                 Checkbox(value: controller.checkBox.value, onChanged: (v) {
                   controller.checkBox.value = v!;
                 },activeColor: C.mainColor,),
-                MyText('勾选同意',color: C.f333),
-                if(controller.curLoginType.value == controller.TYPE_EMAIL)
+                MyText('勾选同意'.tr,color: C.f333),
                 MyButton(
                   color: C.whiteBg,
                   onTap: () {
+                    Get.toNamed(AppRoutes.HTML_CONTENT,arguments: {'title': '用户服务协议'.tr,'id' : 205});
                   },
-                  child: MyText('用户服务协议',color: C.mainColor,),
+                  child: MyText('用户服务协议'.tr,color: C.mainColor,),
                 )
               ],
             );
@@ -215,9 +194,9 @@ class RegisterPage extends StatelessWidget {
             round: 30.w,
             color: controller.loginBtnEnable.isTrue ? C.mainColor : C.fe3e3e3,
             onTap: () {
-
+              controller.toRegisterAction();
             },
-            child: MyText('登录',color: C.f333,size: 16.sp,),
+            child: MyText('注册'.tr,color: C.f333,size: 16.sp,),
           )),
         ],
       ),
@@ -268,13 +247,13 @@ class RegisterPage extends StatelessWidget {
               ) : null,
               prefixIcon: showPre ? MyGestureDetector(
                 onTap: () {
-                  controller.toAreaCodeList();
+
                 },
                 child: Container(
                   padding: MyInsets(left: 10.w),
                   child: Row(
                     children: [
-                      MyText('${controller.curCodeStr.value}  '),
+                      MyText('  '),
                       MyImg.icArrDown
                     ],
                   ),
@@ -303,7 +282,7 @@ class RegisterPage extends StatelessWidget {
                   onTap: () {
                     if(controller.countTime.value != controller.NOR_COUNT_TIME) return;
                     if(controller.accCtrl.value.text.isEmpty) {
-                      Util.showToast('手机号不能为空');
+                      Util.showToast('账号不能为空'.tr);
                       return;
                     }
                     controller.startTimer();

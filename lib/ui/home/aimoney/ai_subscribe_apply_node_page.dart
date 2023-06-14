@@ -25,11 +25,11 @@ class AiSubscribeApplyNodeController extends BaseController {
 
   void toCheckSubscribe() async{
     var confirm = await Get.dialog(CustomDialog(
-      title: '申请节点',
-      content: '确定升级为${curBean.value.jiedianName??''}吗?申请节点的费用会直接\n从您的钱包账户直接划扣。',
+      title: '申请节点'.tr,
+      content:'确定升级为'.tr + '${curBean.value.jiedianName??''}' + '吗?申请节点的费用会直接\n从您的钱包账户直接划扣。'.tr,
       type: DialogType.FORWARD,
-      rightText: '确定',
-      leftText: '取消',
+      rightText: '确认'.tr,
+      leftText: '取消'.tr,
     ));
     if(confirm !=null && confirm) {
       var res = await SubscribeNodeService.applyNode(curBean.value.jiedianId);
@@ -51,7 +51,7 @@ class AiSubscribeApplyNodePage extends StatelessWidget {
     controller = Get.put(AiSubscribeApplyNodeController());
     return Scaffold(
       backgroundColor: C.white,
-      appBar: MyAppBar('申请节点'),
+      appBar: MyAppBar('申请节点'.tr),
       body: Stack(
         children: [
           Obx(() => _body()),
@@ -97,13 +97,13 @@ class AiSubscribeApplyNodePage extends StatelessWidget {
                         MyText(bean.jiedianName??'',size: 16.sp,weight: FontWeight.w500,)
                       ],
                     ),
-                    40.w.spaceW,
+                    30.w.spaceW,
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        MyText('${bean.jiedianAmount??''}USDT  ${bean.totalNodeQuantity??''}个',color: C.f5f5f5f,size: 14.sp,),
-                        MyText('赠送 ${bean.giveLevelName??''}  ${bean.dayAwardAmount??''}USDT/天',color: C.f5f5f5f,size: 14.sp,lineHeight: 1.8),
-                        MyText('全网分红${bean.feeFenhongPer??''}%',color: C.f5f5f5f,size: 14.sp,lineHeight: 1.8),
+                        MyText('${bean.jiedianAmount??''}USDT  ${bean.totalNodeQuantity??''}' + '个'.tr,color: C.f5f5f5f,size: 14.sp,),
+                        MyText('赠送'.tr + ' ${bean.giveLevelName??''}  ${bean.dayAwardAmount??''}USDT/' + '天'.tr,color: C.f5f5f5f,size: 14.sp,lineHeight: 1.8),
+                        MyText('全网分红'.tr + '${bean.feeFenhongPer??''}%',color: C.f5f5f5f,size: 14.sp,lineHeight: 1.8),
                       ],
                     )
                   ],
@@ -128,7 +128,7 @@ class AiSubscribeApplyNodePage extends StatelessWidget {
       textColor: controller.curBean.value.jiedianId != -1 ? C.white : C.f333,
       height: 44.h,
       width: Get.width - 24.w,
-      text: '确定',
+      text: '确认'.tr,
       round: 22.0,
       color: controller.curBean.value.jiedianId != -1 ? C.mainColor : C.fe3e3e3,
       onTap: () {
@@ -137,16 +137,4 @@ class AiSubscribeApplyNodePage extends StatelessWidget {
     );
   }
 
-  _infoItem(String left,String right) {
-    return Padding(
-      padding: MyInsets(bottom: 5.h),
-      child: Row(
-        children: [
-          MyText(left,size: 15.sp,color: C.f5f5f5f,),
-          30.w.spaceW,
-          MyText(right,size: 18.sp,color: C.f333,bold: true,),
-        ],
-      ),
-    );
-  }
 }

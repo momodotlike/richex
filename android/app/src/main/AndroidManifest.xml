@@ -10,7 +10,7 @@
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
 
    <application
-        android:label="flutter_rich_ex"
+        android:label="FUJI"
         android:name="${applicationName}"
         android:requestLegacyExternalStorage="true"
         android:largeHeap="true"

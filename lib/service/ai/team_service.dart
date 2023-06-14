@@ -26,6 +26,16 @@ class TeamService {
   // 团队明细
   static getTeamList(query) async{
     List<AiMineTeamListBean> list = [];
+    // var res = await DioUtil.request(API.mineTeamList,query: query);
+    // if(res !=null) {
+    //   res.forEach((element) {
+    //     AiMineTeamListBean bean = AiMineTeamListBean.fromJson(element);
+    //     list.add(bean);
+    //   });
+    //   return list;
+    // }
+    // return list;
+
     try {
       var res = await DioUtil.request(API.mineTeamList,query: query);
       if(res !=null) {

@@ -1,15 +1,15 @@
 import 'package:flutter_rich_ex/bean/invest_bean.dart';
 import 'package:flutter_rich_ex/dialog/custom_dialog.dart';
+import 'package:flutter_rich_ex/dialog/info_dialog.dart';
 import 'package:flutter_rich_ex/event/event.dart';
 import 'package:flutter_rich_ex/service/ai/invest_service.dart';
-import 'package:flutter_rich_ex/service/user_service.dart';
 import 'package:flutter_rich_ex/util/date_util.dart';
 import 'package:flutter_rich_ex/util/export.dart';
 import 'package:get/get.dart';
 
 class AiSubscribeController extends BaseController {
 
-  RxString curTab = '收益明细'.obs;
+  RxString curTab = '收益明细'.tr.obs;
   RxBool showMoney = true.obs;
   String starMoney = '***';
   RxBool checkBox = false.obs;
@@ -17,15 +17,13 @@ class AiSubscribeController extends BaseController {
   var id; // 租赁id
   Rx<ZulinBean> detailBean = ZulinBean().obs;
   RxString ableCount = ''.obs;
-  RxBool isShowDetail = false.obs;
   TextEditingController ctrl = TextEditingController();
 
   @override
   void onReady() {
     super.onReady();
-    isShowDetail.value = Get.arguments['hasBuyNode'];
     id = Get.arguments['id'];
-    curTab.value = '智能理财';
+    curTab.value = '智能理财'.tr;
     getData();
   }
 
@@ -34,7 +32,7 @@ class AiSubscribeController extends BaseController {
     if(res != null) {
       InvestBean bean = res;
       detailBean.value = bean.zulin!;
-      ableCount.value = '${bean.totalBalance??''}';
+      ableCount.value = bean.totalBalance??'';
     }
   }
 
@@ -45,17 +43,42 @@ class AiSubscribeController extends BaseController {
   void toCheckSubscribe() async{
     var mount = ctrl.text.trim();
     if(mount.isEmpty) { // 不为100的整数
-      Util.showToast('申购额度格式不能为空');
+      Util.showToast('申购额度格式不能为空'.tr);
       return;
     }
+
+    var minCount = detailBean.value.minZulinAmount!;
+    var maxCount = detailBean.value.maxZulinAmount!;
+    var ownCount = detailBean.value.ownZulinAmount!;
+
+    if(num.parse(mount) < num.parse(minCount) || num.parse(mount) > num.parse(maxCount)) {
+      Util.showToast( '申购额度应大于'.tr + '$minCount '+ '或小于'.tr +'$maxCount');
+      return ;
+    }
+    if(num.parse(mount) > num.parse(ableCount.value)) {
+      Util.showToast( '申购额度应小于'.tr + '${ableCount.value}');
+      return ;
+    }
+
     try {
-      var t = double.parse(mount) % 100 == 0;
+      var t = num.parse(mount) % 100 == 0;
       if(!t) {
-        Util.showToast('格式不正确');
+        Util.showToast('格式不正确'.tr);
         return;
       }
     }catch(e) {
-      Util.showToast('格式不正确');
+      Util.showToast('格式不正确'.tr);
+      return;
+    }
+
+    var confirm = await Get.dialog(CustomDialog(
+      title: '温馨提示'.tr,
+      content: '${'是否确认申购'.tr} $mount USDT ${'智能理财产品'.tr}。',
+      type: DialogType.FORWARD,
+      rightText: '确认'.tr,
+      leftText: '取消'.tr,
+    ));
+    if(confirm ==null || !confirm) {
       return;
     }
     // 已认证
@@ -66,20 +89,24 @@ class AiSubscribeController extends BaseController {
     var res = await InvestService.subscribeAction(query);
     print('结果====$res');
     if(res) {
-      var confirm = await Get.dialog(CustomDialog(
-        title: '温馨提示',
-        content: '恭喜您成功购买  $mount  USDT 智能理财产品。',
-        type: DialogType.FORWARD,
-        rightText: '查询记录',
-        leftText: '取消',
+      var dlgRes = await Get.dialog(InfoDialog(
+        content: '恭喜您申购成功'.tr,
       ));
-
-      if(confirm !=null && confirm) {
-        eventBus.fire(RefreshAiMineNavEvent());
-        Get.back(result: 2);
-      }else {
-        Get.back();
-      }
+      eventBus.fire(RefreshAiMineNavEvent());
+      Get.back(result: 2);
+      // var confirm = await Get.dialog(CustomDialog(
+      //   title: '温馨提示',
+      //   content: '恭喜您成功购买  $mount  USDT 智能理财产品。',
+      //   type: DialogType.FORWARD,
+      //   rightText: '查询记录',
+      //   leftText: '取消',
+      // ));
+      // if(confirm !=null && confirm == true) {
+      //   eventBus.fire(RefreshAiMineNavEvent());
+      //   Get.back(result: 2);
+      // }else {
+      //   Get.back();
+      // }
     }
 
     // var res = await UserService.isRealName();
@@ -145,16 +172,16 @@ class AiSubscribePage extends StatelessWidget {
       appBar: MyAppBar(
         '',
         centerTitle: Obx(() => MyText(controller.curTab.value,size: 18.sp,)),
-        actions: [
-          GestureDetector(
-            onTap: () => controller.toRule(),
-            child: Container(
-              alignment: Alignment.centerRight,
-              margin: MyInsets(right: 15.w),
-              child: MyText('规则'),
-            ),
-          )
-        ],
+        // actions: [
+        //   GestureDetector(
+        //     onTap: () => controller.toRule(),
+        //     child: Container(
+        //       alignment: Alignment.centerRight,
+        //       margin: MyInsets(right: 15.w),
+        //       child: MyText('规则'),
+        //     ),
+        //   )
+        // ],
       ),
       body: _body(),
     );
@@ -189,7 +216,7 @@ class AiSubscribePage extends StatelessWidget {
               height: 16.h,
               textColor: C.white,
               textSize: 10.sp,
-              text: '第一期',
+              text: '第一期'.tr,
             )
           ],
         ),
@@ -197,7 +224,7 @@ class AiSubscribePage extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            MyText('${bean.minZulinAmount??''} USDT / 0.001%',size: 13.sp,color: C.f5f5f5f,),
+            MyText('${bean.minZulinAmount??''} USDT / ${(double.parse(bean.ownZulinAmount??'0') / double.parse(bean.maxZulinAmount??'1')) * 100}%',size: 13.sp,color: C.f5f5f5f,),
             MyText('${bean.maxZulinAmount??''} USDT',size: 13.sp,color: C.f5f5f5f,),
           ],
         ),
@@ -218,11 +245,11 @@ class AiSubscribePage extends StatelessWidget {
           ],
         ),
 
-        _infoItem('最大利率','${bean.maxPer??''} %'),
-        _infoItem('预计年化','${bean.nianhuaPer??''} %'),
-        _infoItem('申购限额','${controller.detailBean.value.minZulinAmount??''}-${controller.detailBean.value.maxZulinAmount??''}'),
+        _infoItem('最大利率'.tr,'${bean.maxPer??''} %'),
+        _infoItem('预计年化'.tr,'${bean.nianhuaPer??''} %'),
+        _infoItem('申购限额'.tr,'${controller.detailBean.value.minZulinAmount??''}-${controller.detailBean.value.maxZulinAmount??''}'),
         // _infoItem('预计利息','6.6484 AIT'),
-        _infoItem('起息日期',DateUtil.formatDate(DateTime.now().add(const Duration(days: 2)),format: DateFormats.y_mo_d_h_m)),
+        _infoItem('起息日期'.tr,DateUtil.formatDate(DateTime.now().add(const Duration(days: 2)),format: DateFormats.y_mo_d)),
       ],
     );
   }
@@ -232,9 +259,9 @@ class AiSubscribePage extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         24.h.spaceH,
-        MyText('申购额度',size: 18.sp,color: C.f333,bold: true,),
+        MyText('申购额度'.tr,size: 18.sp,color: C.f333,bold: true,),
         MyTextField(
-          hintText: '100 USDT 倍数起 ',
+          hintText: '100 USDT ${'倍数起'.tr} ',
           autofocus: false,
           contentPadding: MyInsets(vertical: 10.h,left: 12.w),
           suffixIcon: MyGestureDetector(
@@ -245,14 +272,14 @@ class AiSubscribePage extends StatelessWidget {
               width: 40.w,
               alignment: Alignment.centerRight,
               padding: MyInsets(right: 12.w),
-              child: MyText('全部',color: C.mainColor,bold: true,),
+              child: MyText('全部'.tr,color: C.mainColor,bold: true,),
             ),
           ),
           controller: controller.ctrl,
           keyboardType: TextInputType.number,
         ),
         18.h.spaceH,
-        Obx(() => MyText('   账户余额:${controller.ableCount.value} USDT',size: 15.sp,)),
+        Obx(() => MyText('   ${'账户余额'.tr}:${controller.ableCount.value} USDT',size: 15.sp,)),
         22.h.spaceH,
         Obx(() {
           return Row(
@@ -266,7 +293,7 @@ class AiSubscribePage extends StatelessWidget {
                   controller.checkBox.value = v!;
                 },activeColor: C.mainColor,),
               ),
-              MyText('勾选并同意',color: C.f333),
+              MyText('勾选并同意'.tr,color: C.f333),
               // MyButton(
               //   color: C.white,
               //   onTap: () {
@@ -284,7 +311,7 @@ class AiSubscribePage extends StatelessWidget {
             MyImg.icQues,
             10.w.spaceW,
             // MyText('不返本金,只产生利息,手续费本金扣8%',color: C.ffa8c35,),
-            MyText('利息奖励AIT',color: C.ffa8c35,),
+            MyText('利息奖励AIT'.tr,color: C.ffa8c35,),
           ],
         ),
         20.h.spaceH,
@@ -297,7 +324,7 @@ class AiSubscribePage extends StatelessWidget {
       textColor: controller.checkBox.isTrue ? C.white : C.f333,
       height: 44.h,
       width: Get.width - 24.w,
-      text: '确认申购',
+      text: '确认申购'.tr,
       round: 22.0,
       color: controller.checkBox.isTrue ? C.mainColor : C.fe3e3e3,
       onTap: () {

@@ -28,6 +28,8 @@ class SplashController extends BaseController with GetSingleTickerProviderStateM
       //   RouteUtil.toMain();
       //   return;
       // }
+      // SpUtil.putString(Constant.contactToken,'ab44b219bfe3aebcbc1b60b12967b7a4');
+      // SpUtil.putBool(Constant.IS_LOGIN,true);
       RouteUtil.toMain();
       // RouteUtil.toLogin();
     });

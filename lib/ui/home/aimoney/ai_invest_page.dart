@@ -4,37 +4,44 @@ import 'package:flutter_rich_ex/event/event.dart';
 import 'package:flutter_rich_ex/service/ai/invest_service.dart';
 import 'package:flutter_rich_ex/service/ai/subscribe_node_service.dart';
 import 'package:flutter_rich_ex/ui/home/ai_money_page.dart';
-import 'package:flutter_rich_ex/ui/home/aimoney/ai_mine_page.dart';
 import 'package:flutter_rich_ex/util/export.dart';
 import 'package:flutter_swiper_null_safety/flutter_swiper_null_safety.dart';
 import 'package:get/get.dart';
 
 class AiInvestController extends BaseController {
 
-  RxString curTab = '智能理财'.obs;
+  RxString curTab = '智能理财'.tr.obs;
   RxList<ZulinBean> investList = <ZulinBean>[].obs;
 
   RxBool hasBuyNode = false.obs;
-  List<SubscribeNodeBean> nodeList = [];
-  AiMoneyController aiMainCtrl = Get.find();
+  List<StreamSubscription> subscriptions = [];
+
+  AiMoneyController aiMainLogic = Get.find();
 
   @override
-  void onInit() {
-    super.onInit();
-    getNode();
-    getData();
-  }
-
-  getNode() async{
-    var query = {'page_no': '1','pageSize': '10'};
-    List<SubscribeNodeBean> nodeRes = await SubscribeNodeService.getBuyList(query);
-    nodeList.addAll(nodeRes);
+  void onClose() {
+    super.onClose();
+    subscriptions.forEach((element) {
+      element?.cancel();
+    });
   }
 
   @override
   void onReady() {
     super.onReady();
-    // getData();
+    final s1 = eventBus.on<RefreshAiTabEvent>().listen((event) async {
+      if(event.name == '投资'.tr) {
+        getData();
+      }
+    });
+    subscriptions.add(s1);
+  }
+
+
+  @override
+  void onInit() {
+    super.onInit();
+    getData();
   }
 
   getData() async{
@@ -42,16 +49,17 @@ class AiInvestController extends BaseController {
     print('res===$res');
     if(res !=null) {
       InvestBean bean = res;
+      investList.clear();
       investList.addAll(bean.zulinList??[]);
-      hasBuyNode.value = bean.jiedian! > 0;
+      hasBuyNode.value = num.parse('${bean.jiedian}') > 0;
     }
   }
 
-  void toSubscribe(String id) {
-    var res = Get.toNamed(AppRoutes.AI_SUBSCRIBE,arguments: {'hasBuyNode': hasBuyNode.isTrue,'id': id});
+  void toSubscribe(String id) async{
+    var res = Get.toNamed(AppRoutes.AI_SUBSCRIBE,arguments: {'id': id});
     if(res !=null) {
-      print('res===$res');
-      aiMainCtrl.curTab.value = aiMainCtrl.TYPE_MINE;
+      aiMainLogic.curTab.value = aiMainLogic.TYPE_MINE;
+      eventBus.fire(RefreshAiMineNavEvent());
     }
   }
 }
@@ -93,7 +101,7 @@ class AiInvestPage extends StatelessWidget {
                 MyImg.assetImg('home/ic_banner.png', double.infinity, 130.h,fit: BoxFit.fill,),
                 Padding(
                   padding: MyInsets(left: 27.w,vertical: 14.h),
-                  child: MyText('您身边的\n智能理财专家',size: 22.sp,bold: true,color: C.white,lineHeight: 1.8,),
+                  child: MyText('您身边的\n智能理财专家'.tr,size: 22.sp,bold: true,color: C.white,lineHeight: 1.8,),
                 )
               ],
             ),
@@ -127,19 +135,20 @@ class AiInvestPage extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           ...[
-            {'path': AppRoutes.AI_SUBSCRIBE_NODE,'ic': 'home/ai/ic_invest_nav_0.png','txt': '节点认购'},
-            {'path': AppRoutes.AI_MING,'ic': 'home/ai/ic_invest_nav_1.png','txt': 'AIC挖矿'},
-            {'path': AppRoutes.AI_QUICK_EXCHANGE,'ic': 'home/ai/ic_invest_nav_2.png','txt': '闪兑'},
-            {'path': AppRoutes.AI_MINE_TEAM,'ic': 'home/ai/ic_invest_nav_3.png','txt': '团队'},
-            {'path': AppRoutes.AI_MONEY,'ic': 'home/ai/ic_invest_nav_4.png','txt': '联系客服'},
+            {'path': AppRoutes.AI_SUBSCRIBE_NODE,'ic': 'home/ai/ic_invest_nav_0.png','txt': '节点'.tr},
+            {'path': AppRoutes.AI_MING,'ic': 'home/ai/ic_invest_nav_1.png','txt': 'AIC挖矿'.tr},
+            {'path': AppRoutes.AI_QUICK_EXCHANGE,'ic': 'home/ai/ic_invest_nav_2.png','txt': '闪兑'.tr},
+            {'path': AppRoutes.AI_MINE_TEAM,'ic': 'home/ai/ic_invest_nav_3.png','txt': '团队'.tr},
+            {'path': AppRoutes.AI_MONEY,'ic': 'home/ai/ic_invest_nav_4.png','txt': '客服'.tr},
           ].map((e) => MyGestureDetector(
               onTap: () async{
                 if(e['path'] == AppRoutes.AI_SUBSCRIBE_NODE) {
-                  if(controller.nodeList.isNotEmpty) {
-                    Get.toNamed(AppRoutes.AI_SUBSCRIBE_NODE);
+                  if(controller.hasBuyNode.isTrue) {
+                    await Get.toNamed(AppRoutes.AI_SUBSCRIBE_NODE);
                   }else {
-                    Get.toNamed(AppRoutes.AI_SUBSCRIBE_APPLY_NODE);
+                    await Get.toNamed(AppRoutes.AI_SUBSCRIBE_APPLY_NODE);
                   }
+                  controller.getData();
                 }else {
                   Get.toNamed(e['path']??'');
                 }
@@ -167,8 +176,8 @@ class AiInvestPage extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
           ...[
-            {'txt': '智能理财',},
-            {'txt': '定期理财',},
+            {'txt': '智能理财'.tr,},
+            // {'txt': '定期理财',},
           ].map((e) {
             return MyGestureDetector(
                 onTap: () {
@@ -199,6 +208,9 @@ class AiInvestPage extends StatelessWidget {
 
   _list() {
     return Obx(() {
+      if(controller.investList.isEmpty) {
+        return EmptyView();
+      }
       return ListView.builder(itemBuilder: (ctx,index) {
         ZulinBean bean = controller.investList[index];
         return MyCard(
@@ -213,7 +225,7 @@ class AiInvestPage extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   MyImg.assetImg('home/ai/ic_invest_list_usdt.png', 64.w, 64.h),
-                  50.w.spaceW,
+                  20.w.spaceW,
                   Expanded(
                     child: SizedBox(
                       height: 85.h,
@@ -224,9 +236,9 @@ class AiInvestPage extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             children: [
-                              MyText('最大利率',color: C.f5f5f5f,),
-                              MyText('预计年化',color: C.f5f5f5f,),
-                              MyText('申购限额',color: C.f5f5f5f,),
+                              MyText('最大利率'.tr,color: C.f5f5f5f,),
+                              MyText('预计年化'.tr,color: C.f5f5f5f,),
+                              MyText('申购限额'.tr,color: C.f5f5f5f,),
                             ],
                           ),
                           Column(
@@ -246,7 +258,7 @@ class AiInvestPage extends StatelessWidget {
               ),
               // if(controller.hasBuyNode.isTrue)
               MyButton(
-                text: '申购',
+                text: '申购'.tr,
                 textColor: C.white,
                 height: 33.h,
                 width: Get.width - 64.w,

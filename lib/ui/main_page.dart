@@ -36,11 +36,11 @@ class MainPage extends StatelessWidget{
   @override
   Widget build(BuildContext context) {
     List pages = [
-      UiEntry.build("", "首页", ['tabbar-0-0.png', 'tabbar-sel-0-0.png'], (s) => HomePage()),
-      UiEntry.build("", "行情", ['tabbar-0-1.png', 'tabbar-sel-0-1.png'], (s) => MarketPage()),
-      UiEntry.build("", "现货", ['tabbar-0-2.png', 'tabbar-sel-0-2.png'], (s) => SpotsPage()),
-      UiEntry.build("", "合约", ['tabbar-0-3.png', 'tabbar-sel-0-4.png'], (s) => ContractPage()),
-      UiEntry.build("", "资产", ['tabbar-0-4.png', 'tabbar-sel-0-4.png'],(s) => AssetsPage()),
+      UiEntry.build("", "首页".tr, ['tabbar-0-0.png', 'tabbar-sel-0-0.png'], (s) => HomePage()),
+      UiEntry.build("", "行情".tr, ['tabbar-0-1.png', 'tabbar-sel-0-1.png'], (s) => MarketPage()),
+      UiEntry.build("", "现货".tr, ['tabbar-0-2.png', 'tabbar-sel-0-2.png'], (s) => SpotsPage()),
+      UiEntry.build("", "合约".tr, ['tabbar-0-3.png', 'tabbar-sel-0-3.png'], (s) => ContractPage()),
+      UiEntry.build("", "资产".tr, ['tabbar-0-4.png', 'tabbar-sel-0-4.png'],(s) => AssetsPage()),
     ];
     return Scaffold(
       body: Obx(() => Column(children: [

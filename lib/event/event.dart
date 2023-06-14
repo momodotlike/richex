@@ -31,6 +31,12 @@ class RefreshAiMineNavEvent {
   RefreshAiMineNavEvent({this.index});
 }
 
+// 刷新tab栏数据
+class RefreshAiTabEvent {
+  String? name;
+  RefreshAiTabEvent({this.name});
+}
+
 // 刷新用户信息
 class RefreshUserInfo {
   RefreshUserInfo();

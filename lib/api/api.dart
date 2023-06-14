@@ -1,15 +1,19 @@
 class API {
 
   // 接口文档：https://www.fjex.io/api-doc/
-
+  // 370998292@qq.com  5211314a
   // 理财接口文档
   // https://doc.walletim.pro/web/#/16/997
   // 测试域名：https://lcapitest.fjex.io
   // 测试token：c80d1541b4fda19fdb1038369a546715
-  static const String baseUrl = 'https://www.fjex.io/';
+  // 临时邮箱 https://temp-mail.org/zh  'feyoyi1055@ratedane.com';
+  // 网页端注册： https://www.fjex.io/h5/#/mobile/registerPage?inviteCode=XLJBa0p5
+  static const String baseUrl = 'https://www.fjex.pro/';
 
   // ai理财域名[暂时]
-  static const String baseNewUrl = 'https://testlcapi.fjex.io';
+  // static const String baseNewUrl = 'https://testlcapi.fjex.pro';
+  static const String baseNewUrl = 'https://testlcapi.fjex.pro';
+  // static const String baseNewUrl = 'https://testlcapi.fjex.io';
 
   // 获取客服二维码
   static const String CHATCODE = '/au/customerService';
@@ -65,5 +69,26 @@ class API {
   static const String feeCate4 = baseNewUrl + '/api/my/jiedian_list';
   static const String feeCate5 = baseNewUrl + '/api/my/share_list';
   static const String feeCate6 = baseNewUrl + '/api/my/team_list';
+
+  // aic挖矿
+  static const String aicDetail = baseNewUrl + '/api/wakuang/aic_detail';
+  // ait详情 【顶部】
+  static const String aitDetail = baseNewUrl + '/api/wakuang/ait_detail';
+  static const String aitList = baseNewUrl + '/api/wakuang/ait_account_list';
+  // aic 账单列表
+  static const String aicAccountList = baseNewUrl + '/api/wakuang/aic_account_list';
+  // aic价格涨幅图标内容
+  static const String aicPriceRank = baseNewUrl + '/api/wakuang/aic_list';
+  // 销毁ait
+  static const String destroyAIT = baseNewUrl + '/api/wakuang/xiaohui';
+  // 邀请列表
+  static const String inviteList = baseNewUrl + '/api/team/zhitui_list';
+
+  // 兑换
+  static const String exchangeList = baseNewUrl + '/api/exchange/exchange_list';
+  // 闪兑详情
+  static const String exchangeDetail = baseNewUrl + '/api/exchange/detail';
+  // 闪兑
+  static const String exchangeAction = baseNewUrl + '/api/exchange/exchange';
 
 }

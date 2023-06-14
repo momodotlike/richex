@@ -113,7 +113,7 @@ class CustomDialog extends StatelessWidget {
                     // ),
                     _button(
                       bgColor: C.white,
-                      text: rightText ?? '确定',
+                      text: rightText ?? '确认'.tr,
                       textStyle: TextStyle(color: C.fa3ff74,fontSize: 16.sp),
                       onTap: () {
                         Get.back(result: true);

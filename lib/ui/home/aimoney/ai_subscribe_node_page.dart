@@ -1,62 +1,140 @@
 import 'package:flutter_rich_ex/bean/node_detail_bean.dart';
 import 'package:flutter_rich_ex/bean/subscribe_node_bean.dart';
-import 'package:flutter_rich_ex/dialog/custom_dialog.dart';
 import 'package:flutter_rich_ex/service/ai/subscribe_node_service.dart';
 import 'package:flutter_rich_ex/util/export.dart';
-import 'package:flutter_swiper_null_safety/flutter_swiper_null_safety.dart';
 import 'package:get/get.dart';
+import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 class AiSubscribeNodeController extends BaseController {
 
   RxList<SubscribeNodeBean> nodeList = <SubscribeNodeBean>[].obs;
 
   Rx<NodeDetailBean> detailBean = NodeDetailBean().obs;
+  int pageIndex = 1;
+  final RefreshController refreshController = RefreshController();
+  ScrollController scrollController = ScrollController();
+  RxBool hasNoData = false.obs;
 
   @override
   void onReady() {
     super.onReady();
+    getDetail();
     getData();
   }
 
-  getData() async{
+  getDetail() async{
     var detail = await SubscribeNodeService.getNodeDetail();
     if(detail !=null) {
       detailBean.value = detail;
     }
+  }
 
+  getData() async{
+    if(pageIndex == 1) {
+      nodeList.clear();
+      refreshController.resetNoData();
+    }
     var query = {
-      'page_no': '1',
-      'pageSize': '10',
+      'page_no': pageIndex,
     };
-    var res = await SubscribeNodeService.getBuyList(query);
+    List<SubscribeNodeBean> res = await SubscribeNodeService.getBuyList(query);
     nodeList.addAll(res);
+    hasNoData.value = res.isEmpty;
   }
 
 }
-class AiSubscribeNodePage extends StatelessWidget {
+class AiSubscribeNodePage extends StatelessWidget with RefreshHost{
 
   AiSubscribeNodePage({Key? key}) : super(key: key);
 
   late AiSubscribeNodeController controller ;
 
   @override
+  void onLoading() async {
+    super.onLoading();
+    controller.pageIndex  ++ ;
+    await controller.getData();
+    controller.refreshController.loadComplete();
+    if (controller.hasNoData.isTrue) {
+      controller.refreshController.loadNoData();
+    }
+  }
+
+  @override
+  void onRefresh() async {
+    super.onRefresh();
+    controller.pageIndex = 1;
+    await controller.getData();
+    controller.refreshController.refreshCompleted();
+  }
+
+  @override
   Widget build(BuildContext context) {
     controller = Get.put(AiSubscribeNodeController());
     return Scaffold(
       backgroundColor: C.white,
-      appBar: MyAppBar('节点'),
-      body: _body(),
+      appBar: MyAppBar('节点'.tr),
+      body: Container(
+        padding: MyInsets(horizontal: 15.w),
+        child: _body(),
+        // child: Column(
+        //   children: [
+        //     Obx(() => _infoCard()),
+        //     _flagTitle(),
+        //     Expanded(child: _body(),)
+        //   ],
+        // ),
+      ),
     );
   }
 
   _body() {
-    return ListView(
-      padding: MyInsets(horizontal: 14.w,top: 20.h),
-      children: [
-        Obx(() => _infoCard()),
-        _flagTitle(),
-        Obx(() => _list()),
-      ],
+    return SmartRefresh(
+      host: this,
+      enablePullDown: true,
+      enablePullUp: true,
+      controller: controller.refreshController,
+      scrollController: controller.scrollController,
+      child: CustomScrollView(
+        controller: controller.scrollController,
+        slivers: [
+          SliverToBoxAdapter(
+            child: Obx(() => _infoCard()),
+          ),
+          SliverToBoxAdapter(
+            child: _flagTitle(),
+          ),
+          SliverToBoxAdapter(
+              child: Obx(() {
+                if(controller.nodeList.isEmpty) {
+                  return EmptyView();
+                }
+                return ListView.builder(itemBuilder: (ctx,index) {
+                  SubscribeNodeBean bean = controller.nodeList[index];
+                  return Container(
+                      decoration: BoxDecoration(
+                          border: Border(
+                              bottom: BorderSide(width: 0.5,color: C.divider)
+                          )
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          _item(bean.phone??'',color: C.f999,),
+                          _item(bean.jiedianName??'',color: C.f999,),
+                          _item(bean.totalBonus??'',color: C.f999,),
+                          _item(bean.dayQuntity??'',color: C.f999,),
+                        ],
+                      )
+                  );
+                },itemCount: controller.nodeList.length,
+                  shrinkWrap: true,physics: const NeverScrollableScrollPhysics(),
+                  padding: MyInsets(bottom: 20.w),
+                );
+              })
+          )
+        ],
+      ),
     );
   }
 
@@ -88,7 +166,7 @@ class AiSubscribeNodePage extends StatelessWidget {
                       children: [
                         MyText(detail.jiedianName??'',color: C.black,size: 15.sp,),
                         6.h.spaceH,
-                        MyText('运行天数:${detail.dayQuntity??''}天',color: C.f5f5f5f,size: 15.sp,),
+                        MyText( '运行天数'.tr + ':${detail.dayQuntity??''}' + '天'.tr,color: C.f5f5f5f,size: 15.sp,),
                       ],
                     )
                   ],
@@ -96,14 +174,14 @@ class AiSubscribeNodePage extends StatelessWidget {
                 5.h.spaceH,
                 Row(
                   children: [
-                    _bannerItem('昨日返佣（USDT）',detail.bonus??'' ),
+                    _bannerItem('昨日返佣（USDT）'.tr,detail.bonus??'' ),
                     Container(
                       height: 30.h,
                       width: 1.w,
                       color: C.white,
                       margin: MyInsets(horizontal: 13.w),
                     ),
-                    _bannerItem('累计返佣（USDT）',detail.totalBonus??''),
+                    _bannerItem('累计返佣（USDT）'.tr,detail.totalBonus??''),
                   ],
                 )
               ],
@@ -120,15 +198,15 @@ class AiSubscribeNodePage extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           18.h.spaceH,
-          MyText('节点详情',color: C.black,size: 16.sp,bold: true,),
+          MyText('节点详情'.tr,color: C.black,size: 16.sp,bold: true,),
           12.h.spaceH,
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              _item('节点名称',bgColor: C.ff0f0f0,color: C.f999,),
-              _item('节点级别',bgColor: C.ff0f0f0,color: C.f999,),
-              _item('节点收益',bgColor: C.ff0f0f0,color: C.f999,),
-              _item('运行天数',bgColor: C.ff0f0f0,color: C.f999,),
+              _item('节点名称'.tr,bgColor: C.ff0f0f0,color: C.f999,),
+              _item('节点级别'.tr,bgColor: C.ff0f0f0,color: C.f999,),
+              _item('节点收益'.tr,bgColor: C.ff0f0f0,color: C.f999,),
+              _item('运行天数'.tr,bgColor: C.ff0f0f0,color: C.f999,),
             ],
           )
         ],
@@ -161,28 +239,4 @@ class AiSubscribeNodePage extends StatelessWidget {
     );
   }
 
-  _list() {
-    return ListView.builder(itemBuilder: (ctx,index) {
-      SubscribeNodeBean bean = controller.nodeList[index];
-      return Container(
-        decoration: BoxDecoration(
-          border: Border(
-            bottom: BorderSide(width: 0.5,color: C.divider)
-          )
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            _item(bean.phone??'',color: C.f999,),
-            _item(bean.jiedianName??'',color: C.f999,),
-            _item(bean.totalBonus??'',color: C.f999,),
-            _item(bean.dayQuntity??'',color: C.f999,),
-          ],
-        )
-      );
-    },itemCount: controller.nodeList.length,
-      shrinkWrap: true,physics: const NeverScrollableScrollPhysics(),
-      padding: MyInsets(all: 0.w),
-    );
-  }
 }

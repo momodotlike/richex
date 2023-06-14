@@ -1,13 +1,32 @@
+import 'package:flutter_rich_ex/bean/ait_list_bean.dart';
+import 'package:flutter_rich_ex/service/ai/ai_aic_service.dart';
 import 'package:flutter_rich_ex/util/export.dart';
 import 'package:get/get.dart';
 
 class AiCheckController extends BaseController {
 
   RxBool checkBox = false.obs;
+  int pageIndex = 1;
+  RxList<AitListBean> aicList = <AitListBean>[].obs;
 
   @override
   void onReady() {
     super.onReady();
+    getData();
+  }
+
+  getData() async{
+    var query = {'page_no': pageIndex};
+    if(pageIndex == 1) {
+      aicList.clear();
+    }
+    var res = await AiAicService.getAicList(query);
+    if(res !=null) {
+      res.forEach((element) {
+        AitListBean bean = AitListBean.fromJson(element);
+        aicList.add(bean);
+      });
+    }
   }
 }
 
@@ -20,7 +39,7 @@ class AiCheckPage extends StatelessWidget {
     controller = Get.put(AiCheckController());
 
     return Scaffold(
-      appBar: MyAppBar('AIC账单'),
+      appBar: MyAppBar('AIC账单'.tr),
       backgroundColor: C.white,
       body: _body(),
     );
@@ -29,8 +48,13 @@ class AiCheckPage extends StatelessWidget {
   _body() {
     return Column(
       children: [
-        _filter(),
-        _list()
+        // _filter(),
+        Obx(() {
+          if(controller.aicList.isEmpty) {
+            return EmptyView(marginTop: 300.h,);
+          }
+          return _list();
+        }),
       ],
     );
   }
@@ -52,7 +76,7 @@ class AiCheckPage extends StatelessWidget {
             color: C.fefefef,
             child: Row(
               children: [
-                MyText('全部月份',),
+                MyText('全部月份'.tr,),
                 Icon(Icons.keyboard_arrow_down_rounded,size: 20.w,)
               ],
             )
@@ -68,7 +92,7 @@ class AiCheckPage extends StatelessWidget {
             color: C.fefefef,
             child: Row(
               children: [
-                MyText('收入/支出',),
+                MyText('收入/支出'.tr,),
                 Icon(Icons.keyboard_arrow_down_rounded,size: 20.w,)
               ],
             )
@@ -80,6 +104,7 @@ class AiCheckPage extends StatelessWidget {
   _list() {
     return Expanded(
         child: ListView.builder(itemBuilder: (ctx,index) {
+          AitListBean bean = controller.aicList[index];
           return Container(
             decoration: BoxDecoration(
               border: Border(
@@ -93,23 +118,23 @@ class AiCheckPage extends StatelessWidget {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    MyText('币币交易',color: C.f131a22,),
+                    MyText(bean.procTypeVal??'',color: C.f131a22,),
                     5.h.spaceH,
-                    MyText('2023/05/28 13:21:21',color: C.f5f5f5f,size: 11.sp,),
+                    MyText(bean.createTime??'',color: C.f5f5f5f,size: 11.sp,),
                   ],
                 ),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    MyText('-21.12',color: C.f131a22,),
+                    MyText(bean.num??'',color: C.f131a22,),
                     5.h.spaceH,
-                    MyText('已确认',color: C.f5f5f5f,size: 11.sp,),
+                    MyText('已确认'.tr,color: C.f5f5f5f,size: 11.sp,),
                   ],
                 ),
               ],
             ),
           );
-        },itemCount: 20,padding: MyInsets(horizontal: 14.w),)
+        },itemCount: controller.aicList.length,padding: MyInsets(horizontal: 14.w),)
     );
   }
 }

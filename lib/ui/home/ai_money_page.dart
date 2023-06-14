@@ -1,3 +1,4 @@
+import 'package:flutter_rich_ex/event/event.dart';
 import 'package:flutter_rich_ex/ui/home/aimoney/ai_invest_page.dart';
 import 'package:flutter_rich_ex/ui/home/aimoney/ai_invite_page.dart';
 import 'package:flutter_rich_ex/ui/home/aimoney/ai_mine_page.dart';
@@ -6,15 +7,16 @@ import 'package:get/get.dart';
 
 class AiMoneyController extends BaseController {
 
-  RxString curTab = '投资'.obs;
-  final String TYPE_INVEST = '投资';
-  final String TYPE_MINE = '我的';
-  final String TYPE_INVITE = '邀请';
+  RxString curTab = '投资'.tr.obs;
+  final String TYPE_INVEST = '投资'.tr;
+  final String TYPE_MINE = '我的'.tr;
+  final String TYPE_INVITE = '邀请'.tr;
 
   @override
   void onReady() {
     super.onReady();
   }
+
 }
 
 class AiMoneyPage extends StatelessWidget {
@@ -26,7 +28,7 @@ class AiMoneyPage extends StatelessWidget {
   Widget build(BuildContext context) {
     controller = Get.put(AiMoneyController());
     return Scaffold(
-      appBar: MyAppBar('AI理财'),
+      appBar: MyAppBar('AI理财'.tr),
       body: _body(),
     );
   }
@@ -52,7 +54,6 @@ class AiMoneyPage extends StatelessWidget {
         return AiMinePage();
       }
       return Container(
-        color: C.mainColor,
         alignment: Alignment.center,
         child: MyText(controller.curTab.value),
       );
@@ -66,14 +67,15 @@ class AiMoneyPage extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
           ...[
-            {'ic': 'ic_invest.png','ic_sel': 'ic_invest_sel.png','name': '投资'},
-            {'ic': 'ic_invite.png','ic_sel': 'ic_invite_sel.png','name': '邀请'},
-            {'ic': 'ic_mine.png','ic_sel': 'ic_mine_sel.png','name': '我的'},
+            {'ic': 'ic_invest.png','ic_sel': 'ic_invest_sel.png','name': '投资'.tr},
+            {'ic': 'ic_invite.png','ic_sel': 'ic_invite_sel.png','name': '邀请'.tr},
+            {'ic': 'ic_mine.png','ic_sel': 'ic_mine_sel.png','name': '我的'.tr},
           ].map((e) => Obx(() {
             var isSel = controller.curTab.value == e['name'];
             return GestureDetector(
               onTap: () {
                 controller.curTab.value = e['name']??'';
+                eventBus.fire(RefreshAiTabEvent(name: e['name']));
               },
               child: Container(
                 child: Column(

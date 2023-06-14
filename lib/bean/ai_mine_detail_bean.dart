@@ -34,17 +34,16 @@ class AiMineDetailBean {
     valuation = '${json['valuation']}';
     amount = '${json['amount']}';
     income = '${json['income']}';
-    tuijian =
-    json['tuijian'] != null ? new DetailListBean.fromJson(json['tuijian']) : null;
+    tuijian = (json['tuijian'] != null && '${json['tuijian']}' != '[]') ? new DetailListBean.fromJson(json['tuijian']) : null;
     weight =
-    json['weight'] != null ? new DetailListBean.fromJson(json['weight']) : null;
-    zulin = json['zulin'] != null ? new DetailListBean.fromJson(json['zulin']) : null;
+    (json['weight'] != null && '${json['weight']}' != '[]') ? new DetailListBean.fromJson(json['weight']) : null;
+    zulin = (json['zulin'] != null && '${json['zulin']}' != '[]') ? new DetailListBean.fromJson(json['zulin']) : null;
     jiedian =
-    json['jiedian'] != null ? new DetailListBean.fromJson(json['jiedian']) : null;
+    (json['jiedian'] != null && '${json['jiedian']}' != '[]') ? new DetailListBean.fromJson(json['jiedian']) : null;
     pingji =
-    json['pingji'] != null ? new DetailListBean.fromJson(json['pingji']) : null;
-    share = json['share'] != null ? new DetailListBean.fromJson(json['share']) : null;
-    team = json['team'] != null ? new DetailListBean.fromJson(json['team']) : null;
+    ( json['pingji'] != null &&  '${json['pingji']}' != '[]') ? new DetailListBean.fromJson(json['pingji']) : null;
+    share = (json['share'] != null && '${json['share']}' != '[]') ? new DetailListBean.fromJson(json['share']) : null;
+    team = (json['team'] != null && '${json['team']}' != '[]') ? new DetailListBean.fromJson(json['team']) : null;
   }
 
   Map<String, dynamic> toJson() {
@@ -80,10 +79,7 @@ class AiMineDetailBean {
 class DetailListBean {
   int? period;
   int? uid;
-  int? uidLevelId;
   String? levelWeightPer;
-  int? ownPerformance;
-  int? teamPerformance;
   String? weightPer;
   String? bonus;
   String? sendBonus;
@@ -95,10 +91,7 @@ class DetailListBean {
   DetailListBean(
       {this.period,
         this.uid,
-        this.uidLevelId,
         this.levelWeightPer,
-        this.ownPerformance,
-        this.teamPerformance,
         this.weightPer,
         this.bonus,
         this.sendBonus,
@@ -108,29 +101,23 @@ class DetailListBean {
         this.uidLevelName});
 
   DetailListBean.fromJson(Map<String, dynamic> json) {
-    period = json['period'];
-    uid = json['uid'];
-    uidLevelId = json['uid_level_id'];
-    levelWeightPer = json['level_weight_per'];
-    ownPerformance = json['own_performance'];
-    teamPerformance = json['team_performance'];
-    weightPer = json['weight_per'];
-    bonus = json['bonus'];
-    sendBonus = json['send_bonus'];
-    statTime = json['stat_time'];
-    isSend = json['is_send'];
-    sendTime = json['send_time'];
-    uidLevelName = json['uid_level_name'];
+    period = json['period'] ?? '';
+    uid = json['uid'] ?? '';
+    levelWeightPer = json['level_weight_per'] ?? '';
+    weightPer = json['weight_per'] ?? '';
+    bonus = json['bonus'] ?? '';
+    sendBonus = json['send_bonus'] ?? '';
+    statTime = json['stat_time'] ?? '';
+    isSend = json['is_send'] ?? '';
+    sendTime = json['send_time'] ?? '';
+    uidLevelName = json['uid_level_name'] ?? '';
   }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['period'] = this.period;
     data['uid'] = this.uid;
-    data['uid_level_id'] = this.uidLevelId;
     data['level_weight_per'] = this.levelWeightPer;
-    data['own_performance'] = this.ownPerformance;
-    data['team_performance'] = this.teamPerformance;
     data['weight_per'] = this.weightPer;
     data['bonus'] = this.bonus;
     data['send_bonus'] = this.sendBonus;

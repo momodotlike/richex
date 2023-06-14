@@ -24,4 +24,5 @@ abstract class AppRoutes {
   static const AI_RULE = '/ai_rule';
   static const AI_MINE_FEE_LIST = '/ai_mine_fee_list';
   static const AI_MINE_TEAM_LIST = '/ai_mine_team_list';
+  static const HTML_CONTENT = '/html_content';
 }

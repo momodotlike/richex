@@ -10,9 +10,9 @@ class InviteFriendController extends BaseController {
   }
 
   toShowDialog(String e) {
-    if(e == '面对面分享') {
+    if(e == '面对面分享'.tr) {
       Get.dialog(ShareFaceDialog());
-    }else if(e =='复制链接') {
+    }else if(e =='复制链接'.tr) {
 
     }else {
 
@@ -27,7 +27,7 @@ class InviteFriendPage extends StatelessWidget {
   Widget build(BuildContext context) {
     controller = Get.put(InviteFriendController());
     return Scaffold(
-      appBar: MyAppBar('邀请好友'),
+      appBar: MyAppBar('邀请好友'.tr),
       body: _body(),
     );
   }
@@ -41,9 +41,9 @@ class InviteFriendPage extends StatelessWidget {
       child: Column(
         children: [
           32.h.spaceH,
-          MyText('邀请好友注册下载',size: 32.sp,bold: true,),
+          MyText('邀请好友注册下载'.tr,size: 32.sp,bold: true,),
           17.h.spaceH,
-          MyText('一起轻松交易数字货币',size: 18.sp,),
+          MyText('一起轻松交易数字货币'.tr,size: 18.sp,),
           28.h.spaceH,
           Container(
             height: 320.h,
@@ -55,7 +55,7 @@ class InviteFriendPage extends StatelessWidget {
             child: Column(
               children: [
                 16.h.spaceH,
-                MyText('累计邀请人数'),
+                MyText('累计邀请人数'.tr),
                 16.h.spaceH,
                 MyText('2001',size: 30.sp,),
                 16.h.spaceH,
@@ -64,7 +64,7 @@ class InviteFriendPage extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      MyText('我的邀请码'),
+                      MyText('我的邀请码'.tr),
                       16.h.spaceH,
                       Container(
                         height: 40.h,
@@ -90,7 +90,7 @@ class InviteFriendPage extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      MyText('我的专属邀请链接'),
+                      MyText('我的专属邀请链接'.tr),
                       16.h.spaceH,
                       Container(
                         height: 40.h,
@@ -121,9 +121,9 @@ class InviteFriendPage extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 ...[
-                  {'name': '面对面分享','link': 'ic_invite_share.png'},
-                  {'name': '复制链接','link': 'ic_invite_link.png'},
-                  {'name': '邀请海报','link': 'ic_invite_link.png'},
+                  {'name': '面对面分享'.tr,'link': 'ic_invite_share.png'},
+                  {'name': '复制链接'.tr,'link': 'ic_invite_link.png'},
+                  {'name': '邀请海报'.tr,'link': 'ic_invite_link.png'},
                 ].map((e) {
                   return MyGestureDetector(
                     onTap: () => controller.toShowDialog(e['name']??''),

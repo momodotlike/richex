@@ -4,23 +4,33 @@ import 'package:flutter_rich_ex/bean/aimine_invest_his_bean.dart';
 import 'package:flutter_rich_ex/bean/invest_bean.dart';
 import 'package:flutter_rich_ex/bean/user_info_bean.dart';
 import 'package:flutter_rich_ex/util/export.dart';
+import 'package:get/get.dart';
 
 class AiMineService {
 
   // 详情
   static getDetail() async{
-    try {
-      var res = await DioUtil.request(API.mineDetail);
-      print('res===$res');
-      if(res !=null) {
-        AiMineDetailBean bean = AiMineDetailBean.fromJson(res);
-        return bean;
-      }
-      return null;
-    }catch(e) {
-      print('报错了$e');
-      return null;
+
+    var res = await DioUtil.request(API.mineDetail);
+    print('res===$res');
+    if(res !=null) {
+      AiMineDetailBean bean = AiMineDetailBean.fromJson(res);
+      return bean;
     }
+    return null;
+
+    // try {
+    //   var res = await DioUtil.request(API.mineDetail);
+    //   print('res===$res');
+    //   if(res !=null) {
+    //     AiMineDetailBean bean = AiMineDetailBean.fromJson(res);
+    //     return bean;
+    //   }
+    //   return null;
+    // }catch(e) {
+    //   print('报错了$e');
+    //   return null;
+    // }
   }
 
   // 投资记录
@@ -45,17 +55,17 @@ class AiMineService {
   // 各类收益列表
   static getTypeList(type,query) async{
     var url;
-    if(type == '推荐收益') {
+    if(type == '推荐收益'.tr) {
       url = API.feeCate1;
-    }else if(type == '分红收益') {
+    }else if(type == '分红收益'.tr) {
       url = API.feeCate2;
-    }else if(type == '租赁收益') {
+    }else if(type == '租赁收益'.tr) {
       url = API.feeCate3;
-    }else if(type == '节点收益') {
+    }else if(type == '节点收益'.tr) {
       url = API.feeCate4;
-    }else if(type == '分享收益') {
+    }else if(type == '分享收益'.tr) {
       url = API.feeCate5;
-    }else if(type == '团队收益') {
+    }else if(type == '团队收益'.tr) {
       url = API.feeCate6;
     }
 

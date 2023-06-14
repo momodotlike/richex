@@ -4,6 +4,7 @@ class Config {
 
   // 判断用户是否登录
   static bool isLogin() {
-    return SpUtil.getBool(Constant.IS_LOGIN);
+    var contactToken = SpUtil.getString(Constant.contactToken,defValue: '');
+    return SpUtil.getBool(Constant.IS_LOGIN) && contactToken.isNotEmpty;
   }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter_rich_ex/router/route_auth_middleware.dart';
+import 'package:flutter_rich_ex/ui/common/html_content_page.dart';
 import 'package:flutter_rich_ex/ui/home/ai_money_page.dart';
 import 'package:flutter_rich_ex/ui/home/aimoney/ai_asset_page.dart';
 import 'package:flutter_rich_ex/ui/home/aimoney/ai_check_page.dart';
@@ -161,6 +162,11 @@ class AppPages {
       name: AppRoutes.AI_MINE_TEAM_LIST,
       middlewares: [RouteAuthMiddleware()],
       page: () => AiMineTeamListPage(),
+    ),
+    // h5内容
+    GetPage(
+      name: AppRoutes.HTML_CONTENT,
+      page: () => HtmlContentPage(),
     ),
 
   ];

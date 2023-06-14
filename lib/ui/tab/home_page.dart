@@ -1,3 +1,4 @@
+import 'package:flutter_rich_ex/router/routes.dart';
 import 'package:flutter_rich_ex/util/export.dart';
 import 'package:flutter_rich_ex/util/pull_to_refresh.dart';
 import 'package:flutter_swiper_null_safety/flutter_swiper_null_safety.dart';
@@ -30,7 +31,7 @@ class HomeController extends BaseController {
   }
 
   void toLogin() {
-    Get.toNamed(AppRoutes.LOGIN);
+    RouteUtil.cleanUserInfo();
   }
 
 }

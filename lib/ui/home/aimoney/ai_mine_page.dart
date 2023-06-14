@@ -1,17 +1,15 @@
-import 'dart:async';
-
 import 'package:flutter_rich_ex/bean/ai_mine_detail_bean.dart';
 import 'package:flutter_rich_ex/bean/aimine_invest_his_bean.dart';
 import 'package:flutter_rich_ex/event/event.dart';
 import 'package:flutter_rich_ex/service/ai/ai_mine_service.dart';
 import 'package:flutter_rich_ex/ui/home/ai_money_page.dart';
 import 'package:flutter_rich_ex/util/export.dart';
-import 'package:flutter_swiper_null_safety/flutter_swiper_null_safety.dart';
 import 'package:get/get.dart';
+import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 class AiMineController extends BaseController {
 
-  RxString curTab = '收益明细'.obs;
+  RxString curTab = '收益明细'.tr.obs;
   RxBool showMoney = true.obs;
   String starMoney = '***';
 
@@ -23,14 +21,38 @@ class AiMineController extends BaseController {
 
   List<StreamSubscription> subscriptions = [];
 
+  AiMoneyController aiMainLogic = Get.find();
+
+  int pageIndex = 1;
+  final RefreshController refreshController = RefreshController();
+  ScrollController scrollController = ScrollController();
+  RxBool hasNoData = false.obs;
+
+  @override
+  void onClose() {
+    super.onClose();
+    subscriptions.forEach((element) {
+      element?.cancel();
+    });
+  }
+
   @override
   void onReady() {
     super.onReady();
     final s1 = eventBus.on<RefreshAiMineNavEvent>().listen((event) async {
       print('eee${event}');
-      curTab.value = '投资记录';
+      curTab.value = '投资记录'.tr;
+      pageIndex == 1;
+      getData();
+    });
+    final s2 = eventBus.on<RefreshAiTabEvent>().listen((event) async {
+      if(event.name == '我的'.tr) {
+        pageIndex == 1;
+        getData();
+      }
     });
     subscriptions.add(s1);
+    subscriptions.add(s2);
     getData();
   }
 
@@ -46,46 +68,54 @@ class AiMineController extends BaseController {
     if(res !=null) {
       detailBean.value = res;
       var tempBean = detailBean.value;
-
+      beanList.clear();
       // 推荐
       if(tempBean.tuijian !=null) {
-        titleList.add('推荐收益');
+        titleList.add('推荐收益'.tr);
         beanList.add(tempBean.tuijian!);
       }
       // 分红
       if(tempBean.weight !=null) {
-        titleList.add('分红收益');
+        titleList.add('分红收益'.tr);
         beanList.add(tempBean.weight!);
       }
       // 租赁
       if(tempBean.zulin !=null) {
-        titleList.add('租赁收益');
+        titleList.add('租赁收益'.tr);
         beanList.add(tempBean.zulin!);
       }
       // 节点
       if(tempBean.jiedian !=null) {
-        titleList.add('节点收益');
+        titleList.add('节点收益'.tr);
         beanList.add(tempBean.jiedian!);
       }
       // 分享
       if(tempBean.share !=null) {
-        titleList.add('分享收益');
+        titleList.add('分享收益'.tr);
         beanList.add(tempBean.share!);
       }
       if(tempBean.team !=null) {
         // 团队
-        titleList.add('团队收益');
+        titleList.add('团队收益'.tr);
         beanList.add(tempBean.team!);
       }
     }
 
+    getHisList();
+  }
+
+  getHisList() async{
     // 投资记录
     var query = {
-      'page_no': '1',
-      'pageSize': '10',
+      'page_no': pageIndex,
     };
+    if(pageIndex == 1) {
+      hisList.clear();
+      refreshController.resetNoData();
+    }
     var history = await AiMineService.getHistoryList(query);
     hisList.addAll(history);
+    hasNoData.value = history.isEmpty;
   }
 
 
@@ -94,35 +124,99 @@ class AiMineController extends BaseController {
   }
 
 }
-class AiMinePage extends StatelessWidget {
+class AiMinePage extends StatelessWidget with RefreshHost{
 
   AiMinePage({Key? key}) : super(key: key);
 
   late AiMineController controller ;
+
+  @override
+  void onLoading() async {
+    super.onLoading();
+
+    if(controller.curTab.value == '收益明细'.tr) {
+      controller.refreshController.loadComplete();
+      controller.refreshController.loadNoData();
+    }else {
+      controller.pageIndex  ++ ;
+      await controller.getHisList();
+      controller.refreshController.loadComplete();
+      if (controller.hasNoData.isTrue) {
+        controller.refreshController.loadNoData();
+      }
+    }
+  }
+
+  @override
+  void onRefresh() async {
+    super.onRefresh();
+    controller.pageIndex = 1;
+    await controller.getHisList();
+    controller.refreshController.refreshCompleted();
+  }
+
   @override
   Widget build(BuildContext context) {
     controller = Get.put(AiMineController());
     return Scaffold(
       backgroundColor: C.white,
-      body: _body(),
+      body: Container(
+        padding: MyInsets(horizontal: 14.w,top: 20.h),
+        child: _body(),
+      ),
     );
   }
 
   _body() {
-    return Container(
-      child: ListView(
-        padding: MyInsets(horizontal: 14.w,top: 20.h),
-        children: [
-          Obx(() => _bannerInfo()),
-          _navTab(),
-          Obx(() => _list()),
+    return SmartRefresh(
+      host: this,
+      enablePullDown: true,
+      enablePullUp: true,
+      controller: controller.refreshController,
+      scrollController: controller.scrollController,
+      child: CustomScrollView(
+        controller: controller.scrollController,
+        slivers: [
+          SliverToBoxAdapter(
+            child: Obx(() => _bannerInfo()),
+          ),
+          SliverToBoxAdapter(
+            child: _navTab(),
+          ),
+          SliverToBoxAdapter(
+              child: Obx(() {
+                if(controller.curTab.value == '收益明细'.tr) {
+                  if(controller.beanList.isEmpty) {
+                    return const EmptyView();
+                  }
+                  return ListView.builder(itemBuilder: (ctx,index) {
+                    DetailListBean bean = controller.beanList[index];
+                    return _listDetailItem(index,bean);
+                  },itemCount: controller.beanList.length,
+                    shrinkWrap: true,physics: const NeverScrollableScrollPhysics(),
+                    padding: MyInsets(all: 0.w),
+                  );
+                }else {
+                  if(controller.hisList.isEmpty) {
+                    return const EmptyView();
+                  }
+                  return ListView.builder(itemBuilder: (ctx,index) {
+                    return _listHistoryItem(index);
+                  },itemCount: controller.hisList.length,
+                    shrinkWrap: true,physics: const NeverScrollableScrollPhysics(),
+                    padding: MyInsets(all: 0.w),
+                  );
+                }
+              })
+          )
         ],
       ),
     );
   }
+
+
   _bannerInfo() {
     var detailBean = controller.detailBean.value;
-
     return MyCard(
       height: 170.h,
       padding: MyInsets(all: 0.w),
@@ -138,7 +232,7 @@ class AiMinePage extends StatelessWidget {
                 children: [
                   Row(
                     children: [
-                      MyText('理财账户估值',color: C.white,size: 16.sp,),
+                      MyText('理财账户估值'.tr,color: C.white,size: 16.sp,),
                       8.w.spaceW,
                       MyGestureDetector(
                         onTap: () => controller.showMoney.value = !controller.showMoney.value,
@@ -151,14 +245,14 @@ class AiMinePage extends StatelessWidget {
                   16.h.spaceH,
                   Row(
                     children: [
-                      _bannerItem('理财⾦额（USDT）',show ? detailBean.amount??'' : controller.starMoney),
+                      _bannerItem('理财⾦额（USDT）'.tr,show ? detailBean.amount??'' : controller.starMoney),
                       Container(
                         height: 32.h,
                         width: 1.w,
                         color: C.white,
                         margin: MyInsets(horizontal: 13.w),
                       ),
-                      _bannerItem('收益（AIT）',show ? detailBean.income??'' : controller.starMoney),
+                      _bannerItem('收益（AIT）'.tr,show ? detailBean.income??'' : controller.starMoney),
                     ],
                   )
                 ],
@@ -191,12 +285,14 @@ class AiMinePage extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
           ...[
-            {'txt': '收益明细',},
-            {'txt': '投资记录',},
+            {'txt': '收益明细'.tr,},
+            {'txt': '投资记录'.tr,},
           ].map((e) {
             return MyGestureDetector(
                 onTap: () {
                   controller.curTab.value = e['txt']??'';
+                  controller.pageIndex == 1;
+                  controller.getData();
                 },
                 child: Obx(() => Container(
                   padding: MyInsets(horizontal: 6.w,vertical: 4.h),
@@ -223,6 +319,9 @@ class AiMinePage extends StatelessWidget {
 
   _list() {
     if(controller.curTab.value == '收益明细') {
+      if(controller.beanList.isEmpty) {
+        return const EmptyView();
+      }
       return ListView.builder(itemBuilder: (ctx,index) {
         DetailListBean bean = controller.beanList[index];
         return _listDetailItem(index,bean);
@@ -230,13 +329,33 @@ class AiMinePage extends StatelessWidget {
         shrinkWrap: true,physics: const NeverScrollableScrollPhysics(),
         padding: MyInsets(all: 0.w),
       );
+    }else {
+      return SmartRefresh(
+        host: this,
+        enablePullDown: true,
+        enablePullUp: true,
+        controller: controller.refreshController,
+        scrollController: controller.scrollController,
+        child: CustomScrollView(
+          controller: controller.scrollController,
+          slivers: [
+            SliverToBoxAdapter(
+                child: Obx(() {
+                  if(controller.hisList.isEmpty) {
+                    return const EmptyView();
+                  }
+                  return ListView.builder(itemBuilder: (ctx,index) {
+                    return _listHistoryItem(index);
+                  },itemCount: controller.hisList.length,
+                    shrinkWrap: true,physics: const NeverScrollableScrollPhysics(),
+                    padding: MyInsets(all: 0.w),
+                  );
+                })
+            )
+          ],
+        ),
+      );
     }
-    return ListView.builder(itemBuilder: (ctx,index) {
-      return _listHistoryItem(index);
-    },itemCount: controller.hisList.length,
-      shrinkWrap: true,physics: const NeverScrollableScrollPhysics(),
-      padding: MyInsets(all: 0.w),
-    );
   }
 
   _listDetailItem(int index,DetailListBean bean) {
@@ -254,9 +373,9 @@ class AiMinePage extends StatelessWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              _detailItem('收益名称',title),
-              _detailItem('当前收益',bean.bonus??''),
-              _detailItem('收益时间',Util.formatTime('${bean.period??''}')),
+              _detailItem('收益名称'.tr,title),
+              _detailItem('当前收益'.tr,bean.bonus??''),
+              _detailItem('收益时间'.tr,Util.formatTime('${bean.period??''}')),
             ],
           ),
         ],
@@ -276,18 +395,18 @@ class AiMinePage extends StatelessWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              _detailItem('币种','USDT'),
-              _detailItem('当前利率',hisBean.dayAddPer??''),
-              _detailItem('总收益',hisBean.lastPer??''),
+              _detailItem('币种'.tr,'USDT'),
+              _detailItem('当前利率'.tr,hisBean.lastPer??''),
+              _detailItem('总收益'.tr,hisBean.totalBonus??''),
             ],
           ),
           11.h.spaceH,
           Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              _detailItem('本金','${hisBean.touziAmount??''}'),
-              _detailItem('起息日','${hisBean.beginDay??''}'),
-              _detailItem('状态',hisBean.statusVal??''),
+              _detailItem('本金'.tr,'${hisBean.touziAmount??''}'),
+              _detailItem('起息日'.tr,hisBean.beginDay??''),
+              _detailItem('状态'.tr,hisBean.statusVal??''),
             ],
           ),
         ],

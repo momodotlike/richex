@@ -20,7 +20,7 @@ class AiMingSecretPage extends StatelessWidget {
     controller = Get.put(AiMingSecretController());
 
     return Scaffold(
-      appBar: MyAppBar('挖矿秘籍'),
+      appBar: MyAppBar('挖矿秘籍'.tr),
       backgroundColor: C.white,
       body: _body(),
     );

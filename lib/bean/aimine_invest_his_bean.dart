@@ -3,7 +3,7 @@ class AiMineInvestHisBean {
   String? touziTime;
   int? dayQuntity;
   String? dayAddPer;
-  int? beginDay;
+  String? beginDay;
   String? lastPer;
   String? totalBonus;
   String? zulinName;

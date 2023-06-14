@@ -1,3 +1,4 @@
+import 'package:flutter_rich_ex/router/routes.dart';
 import 'package:flutter_rich_ex/ui/login/login_page.dart';
 import 'package:flutter_rich_ex/util/export.dart';
 import 'package:get/get.dart';
@@ -14,9 +15,10 @@ class RouteAuthMiddleware extends GetMiddleware {
   //创建任何内容之前调用此函数
   @override
   GetPage? onPageCalled(GetPage? page) {
-    String token = SpUtil.getString(Constant.token,defValue: '');
+    String token = SpUtil.getString(Constant.contactToken,defValue: '');
     print('token==$token');
     if(token.isEmpty) {
+      RouteUtil.cleanUserInfoWithoutLoginAction();
       return GetPage(name: AppRoutes.LOGIN, page: () => LoginPage());
     }
     return super.onPageCalled(page);

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart'
     hide RefreshIndicator, RefreshIndicatorState;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
+import 'package:get/get.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 /// direction that icon should place to the text
@@ -82,15 +83,15 @@ class _MyCustomHeaderState extends RefreshIndicatorState<MyCustomHeader> {
             EnRefreshString();
     return Text(
         mode == RefreshStatus.canRefresh
-            ? widget.releaseText ?? '松开立即刷新'
+            ? widget.releaseText ?? '松开立即刷新'.tr
             : mode == RefreshStatus.completed
-                ? widget.completeText ?? '刷新完成'
+                ? widget.completeText ?? '刷新完成'.tr
                 : mode == RefreshStatus.failed
-                    ? widget.failedText ?? '刷新失败，请重试'
+                    ? widget.failedText ?? '刷新失败，请重试'.tr
                     : mode == RefreshStatus.refreshing
-                        ? widget.refreshingText ?? '正在刷新数据中...'
+                        ? widget.refreshingText ?? '正在刷新数据中...'.tr
                         : mode == RefreshStatus.idle
-                            ? widget.idleText ?? '下拉可刷新'
+                            ? widget.idleText ?? '下拉可刷新'.tr
                             : mode == RefreshStatus.canTwoLevel
                                 ? widget.canTwoLevelText ??
                                     strings.canTwoLevelText!
@@ -148,7 +149,7 @@ class _MyCustomHeaderState extends RefreshIndicatorState<MyCustomHeader> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               textWidget,
-               Text('最後更新：今天$hourStr:$minuteStr', style: const TextStyle(color: Colors.grey, fontSize: 13))
+               Text('${'最後更新：今天'.tr}$hourStr:$minuteStr', style: const TextStyle(color: Colors.grey, fontSize: 13))
             ],
           )
         ],
@@ -257,14 +258,14 @@ class _MyCustomFooterState extends LoadIndicatorState<MyCustomFooter> {
             EnRefreshString();
     return Text(
         mode == LoadStatus.loading
-            ? widget.loadingText ?? '正在加载更多的数据...'
+            ? widget.loadingText ?? '正在加载更多的数据...'.tr
             : LoadStatus.noMore == mode
-                ? widget.noDataText ?? '已经全部加载完毕'
+                ? widget.noDataText ?? '已经全部加载完毕'.tr
                 : LoadStatus.failed == mode
-                    ? widget.failedText ?? '加载失败...'
+                    ? widget.failedText ?? '加载失败...'.tr
                     : LoadStatus.canLoading == mode
-                        ? widget.canLoadingText ?? '松开立即加载更多'
-                        : widget.idleText ?? '上拉可以加载更多',
+                        ? widget.canLoadingText ?? '松开立即加载更多'.tr
+                        : widget.idleText ?? '上拉可以加载更多'.tr,
         style: widget.textStyle);
   }
 

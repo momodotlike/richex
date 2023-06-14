@@ -45,6 +45,10 @@ dependencies:
   path_provider: ^2.0.12
   # lottie 动画
   lottie: ^2.3.2
+  # 验证码输入框
+  pin_code_fields: ^7.4.0
+  # 折线图
+  flutter_chart_csx: ^1.4.0
 
 dev_dependencies:
   flutter_test:
@@ -60,9 +64,5 @@ flutter:
     - assets/images/home/ai/
     - assets/images/home/invite/
     - assets/images/login/
-    - assets/images/market/
-    - assets/images/spots/
-    - assets/images/contract/
     - assets/images/common/
-    - assets/images/asset/
     - assets/json/

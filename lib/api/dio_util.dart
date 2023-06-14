@@ -33,17 +33,33 @@ class DioUtil {
       data = data;
     }
 
-    String token = SpUtil.getString(Constant.token,defValue: '');
+    String token = SpUtil.getString(Constant.contactToken,defValue: '');
+    String language = SpUtil.getString(Constant.language,defValue: 'en');
+    print('当前token=====$token');
+    if (token == null || token == "") {
+      token = 'app';
+    }
+    String base64token = 'UEVQUEFFWF9UT0tFTg==';
+    var headers = {
+      'token': token,
+      'loginsource': '',
+      'longitude': '',
+      'latitude': '',
+      'ip': '',
+      'language': language,
+      'curtimestamp': '',
+      'curtimestamp': '',
+      String.fromCharCodes(base64Decode(base64token)):token,
+    };
+
     BaseOptions option = BaseOptions(
         baseUrl: API_PREFIX,
         connectTimeout: CONNECT_TIMEOUT,
         receiveTimeout: RECEIVE_TIMEOUT,
-        // headers: {'token': "c80d1541b4fda19fdb1038369a546715",'loginsource': '','longitude': '','latitude': '','ip': '','curtimestamp': ''},
-        headers: {'token': token,'loginsource': '','longitude': '','latitude': '','ip': '','curtimestamp': ''},
+        headers: headers,
         responseType: ResponseType.plain);
     Dio dio = Dio(option);
     var result;
-    // var headers = {'token': "c80d1541b4fda19fdb1038369a546715",'loginsource': '','longitude': '','latitude': '','ip': '','curtimestamp': ''};
     print('requests params $data $query $url');
     try {
       Response response;
@@ -72,9 +88,10 @@ class DioUtil {
         return null;
       }
     } on DioError catch (e) {
-      Util.showToast('请求出错，请稍后重试 $url $e');
+      Util.showToast('net error');
+      print('错误信息:$url ---- $e');
       if(e == DioErrorType.receiveTimeout) {
-        Util.showToast('连接超时');
+        Util.showToast('net timeout');
       }
       // var netBool = await RouteUtil.checkNetState();
       // if(!netBool) {
@@ -99,12 +116,27 @@ class DioUtil {
       print('requests params $data $query $url');
       data = data;
     }
-    String token = SpUtil.getString(Constant.token,defValue: '');
+    String token = SpUtil.getString(Constant.contactToken,defValue: '');
+    String language = SpUtil.getString(Constant.language,defValue: 'en');
+    if (token == null || token == "") {
+      token = 'app';
+    }
+    String base64token = 'UEVQUEFFWF9UT0tFTg==';
+    var headers = {
+      'token': token,
+      'loginsource': '',
+      'longitude': '',
+      'latitude': '',
+      'ip': '',
+      'language': language,
+      'curtimestamp': '',
+      String.fromCharCodes(base64Decode(base64token)):token,
+    };
     BaseOptions option = BaseOptions(
         baseUrl: API_PREFIX,
         connectTimeout: CONNECT_TIMEOUT,
         receiveTimeout: RECEIVE_TIMEOUT,
-        headers: {'token': token,'loginsource': '','longitude': '','latitude': '','ip': '','curtimestamp': ''},
+        headers: headers,
         responseType: ResponseType.plain);
     Dio dio = Dio(option);
     var result;
@@ -137,9 +169,9 @@ class DioUtil {
         return null;
       }
     } on DioError catch (e) {
-      Util.showToast('请求出错，请稍后重试 $url $e');
+      Util.showToast('net error');
       if(e == DioErrorType.receiveTimeout) {
-        Util.showToast('连接超时');
+        Util.showToast('net timeout');
       }
       // var netBool = await RouteUtil.checkNetState();
       // if(!netBool) {
@@ -152,7 +184,7 @@ class DioUtil {
   static Future postForm(String url,params,{String method = 'POST'}) async{
     var formData = FormData.fromMap(params);
     print('formData: $url ====${formData.toString()}');
-    String token = SpUtil.getString(Constant.token);
+    String token = SpUtil.getString(Constant.contactToken);
     var response = await Dio(BaseOptions(contentType: 'multipart/form-data', method: method,headers: {'Authorization': "Bearer $token",'Accept-Language': 'zh-cn'})).request(url, data: formData);
     print('rrrr$response');
     return response.data;

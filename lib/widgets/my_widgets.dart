@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_rich_ex/style/themes.dart';
@@ -113,8 +115,10 @@ class MyButton extends StatelessWidget {
     if (onTap != null) {
       v = GestureDetector(
         behavior: HitTestBehavior.opaque,
+        // onTap: debounceBtn(func: onTap),
         onTap: onTap,
         child: v,
+        onDoubleTap: () {},
       );
     }
     return v;
@@ -179,6 +183,20 @@ class MyText extends Text {
       maxLines: maxLines ?? 10,
       strutStyle: strutStyle,
   );
+}
+
+// 重复点击
+Function() debounceBtn({Function()? func, Duration delay = const Duration(milliseconds: 1000),}) {
+  Timer? timer;
+  target() {
+    if (timer?.isActive ?? false) {
+      timer?.cancel();
+    }
+    timer = Timer(delay, () {
+      func?.call();
+    });
+  }
+  return target;
 }
 
 class MyTextField extends TextField {

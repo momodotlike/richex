@@ -21,12 +21,12 @@ class AreaCodeController extends BaseController {
   }
 
   initData() {
-    areaList.add('美国');
-    areaList.add('韩国');
-    areaList.add('中国');
-    areaList.add('利比亚');
-    areaList.add('马来西亚');
-    areaList.add('马尔代夫');
+    areaList.add('美国'.tr);
+    areaList.add('韩国'.tr);
+    areaList.add('中国'.tr);
+    areaList.add('利比亚'.tr);
+    areaList.add('马来西亚'.tr);
+    areaList.add('马尔代夫'.tr);
   }
 }
 
@@ -96,7 +96,7 @@ class AreaCodePage extends StatelessWidget {
         children: [
           Expanded(child: TextField(
             decoration: InputDecoration(
-                hintText: '请选择国家或者地区',
+                hintText: '请选择国家或者地区'.tr,
                 hintStyle: TextStyle(color: C.f999,fontSize: 14.sp),
                 contentPadding: const MyInsets(vertical: 13, left: 12),
                 focusedBorder: OutlineInputBorder(
@@ -129,7 +129,7 @@ class AreaCodePage extends StatelessWidget {
             onTap: () {
               Get.back();
             },
-            child: MyText('取消',color: C.f999,),
+            child: MyText('取消'.tr,color: C.f999,),
           )
         ],
       ),

@@ -20,6 +20,10 @@ class Util {
     EasyLoading.showToast(text);
   }
 
+  static void showToastWidget(String text) {
+    if(text.trim().isEmpty) return;
+  }
+
   static stopInput() {
     FocusManager.instance.primaryFocus?.unfocus();
   }
